@@ -1,5 +1,5 @@
 ---
-name: ""
+name: "Development"
 about: "구현할 기능 및 작업을 등록합니다."
 title: ""
 labels: []
