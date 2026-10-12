@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUM
+// ============================================================
+
+enum ServiceStatus {
+  MEASURING @map("측정 중")
+  PREPARING @map("준비 중")
+}
+
+// ============================================================
+// BUILDINGS
+// ============================================================
+
+model Building {
+  id            Int           @id
+  name          String        @db.VarChar(30)
+  serviceStatus ServiceStatus @map("service_status")
+  baseFloor     Int?          @map("base_floor") @db.TinyInt
+  topFloor      Int?          @map("top_floor") @db.TinyInt
+  sortOrder     Int           @default(0) @map("sort_order") @db.TinyInt
+
+  elevatorGroups ElevatorGroup[]
+  stairs         Stair[]
+
+  @@map("buildings")
+}
+
+// ============================================================
+// ELEVATOR GROUPS
+// ============================================================
+
+model ElevatorGroup {
+  id            Int    @id
+  buildingId    Int    @map("building_id")
+  name          String @db.VarChar(20)
+  elevatorCount Int    @map("elevator_count") @db.TinyInt
+  roundTripSec  Int    @map("round_trip_sec") @db.SmallInt
+  rssiMin       Int    @map("rssi_min") @db.SmallInt
+  pairedStairId Int    @map("paired_stair_id")
+  sortOrder     Int    @default(0) @map("sort_order") @db.TinyInt
+
+  building    Building @relation(fields: [buildingId], references: [id])
+  pairedStair Stair    @relation(fields: [pairedStairId], references: [id])
+
+  measurements    Measurement[]
+  sensorDevices   SensorDevice[]
+  levelThresholds LevelThreshold[]
+
+  @@map("elevator_groups")
+}
+
+// ============================================================
+// MEASUREMENTS
+// ============================================================
+
+model Measurement {
+  id              BigInt   @id
+  elevatorGroupId Int      @map("elevator_group_id")
+  deviceId        Int      @map("device_id")
+  measuredAt      DateTime @map("measured_at") @db.DateTime(3)
+  receivedAt      DateTime @default(now()) @map("received_at") @db.DateTime(3)
+  windowSec       Int      @map("window_sec") @db.SmallInt
+  deviceCount     Int      @map("device_count") @db.SmallInt
+  estimatedPeople Decimal  @map("estimated_people") @db.Decimal(6, 1)
+  levelId         Int      @map("level_id") @db.TinyInt
+
+  elevatorGroup ElevatorGroup   @relation(fields: [elevatorGroupId], references: [id])
+  device        SensorDevice    @relation(fields: [deviceId], references: [id])
+  level         CongestionLevel @relation(fields: [levelId], references: [id])
+
+  @@map("measurements")
+}
+
+// ============================================================
+// SENSOR DEVICES
+// ============================================================
+
+model SensorDevice {
+  id              Int      @id
+  elevatorGroupId Int      @map("elevator_group_id")
+  name            String   @db.VarChar(30)
+  apiKeyHash      String?  @map("api_key_hash") @db.Char(64)
+  isEnabled       Boolean  @default(true) @map("is_enabled")
+  installedAt     DateTime @default(now()) @map("installed_at") @db.DateTime(0)
+
+  elevatorGroup ElevatorGroup @relation(fields: [elevatorGroupId], references: [id])
+  measurements  Measurement[]
+
+  @@map("sensor_devices")
+}
+
+// ============================================================
+// CONGESTION LEVELS
+// ============================================================
+
+model CongestionLevel {
+  id       Int    @id @db.TinyInt
+  name     String @db.VarChar(10)
+  sendCars Int    @map("send_cars") @db.TinyInt
+
+  measurements    Measurement[]
+  levelThresholds LevelThreshold[]
+
+  @@map("congestion_levels")
+}
+
+// ============================================================
+// LEVEL THRESHOLDS
+// ============================================================
+
+model LevelThreshold {
+  levelId         Int @map("level_id") @db.TinyInt
+  elevatorGroupId Int @map("elevator_group_id")
+  minPeople       Int @map("min_people") @db.SmallInt
+
+  level         CongestionLevel @relation(fields: [levelId], references: [id])
+  elevatorGroup ElevatorGroup   @relation(fields: [elevatorGroupId], references: [id])
+
+  @@id([levelId, elevatorGroupId])
+  @@map("level_thresholds")
+}
+
+// ============================================================
+// STAIRS
+// ============================================================
+
+model Stair {
+  id         Int    @id
+  buildingId Int    @map("building_id")
+  name       String @db.VarChar(20)
+  sortOrder  Int    @default(0) @map("sort_order") @db.TinyInt
+
+  building        Building         @relation(fields: [buildingId], references: [id])
+  elevatorGroups  ElevatorGroup[]
+  stairClimbTimes StairClimbTime[]
+
+  @@map("stairs")
+}
+
+// ============================================================
+// STAIR CLIMB TIMES
+// ============================================================
+
+model StairClimbTime {
+  toFloor Int @map("to_floor") @db.TinyInt
+  stairId Int @map("stair_id")
+  seconds Int @db.SmallInt
+
+  stair Stair @relation(fields: [stairId], references: [id])
+
+  @@id([toFloor, stairId])
+  @@map("stair_climb_times")
+}
+
+// ============================================================
+// APP SETTINGS
+// ============================================================
+
+model AppSetting {
+  id                     Int      @id @default(1) @db.TinyInt
+  measurementIntervalSec Int      @default(10) @map("measurement_interval_sec") @db.SmallInt
+  sensorTimeoutSec       Int      @default(30) @map("sensor_timeout_sec") @db.SmallInt
+  correctionFactor       Decimal  @default(2.40) @map("correction_factor") @db.Decimal(4, 2)
+  recommendHoldSec       Int      @default(30) @map("recommend_hold_sec") @db.SmallInt
+  recommendDiffSec       Int      @default(10) @map("recommend_diff_sec") @db.SmallInt
+  updatedAt              DateTime @default(now()) @map("updated_at") @db.DateTime(0)
+
+  @@map("app_settings")
+}

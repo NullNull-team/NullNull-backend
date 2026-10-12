@@ -1,0 +1,30 @@
+{
+  "name": "nullnull-backend",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "description": "> 붐비는 곳을 피해 여유 있는 공간을 찾아주는 캠퍼스 혼잡도 서비스",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NullNull-team/NullNull-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NullNull-team/NullNull-backend/issues"
+  },
+  "homepage": "https://github.com/NullNull-team/NullNull-backend#readme",
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "dotenv": "^18.0.7",
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.3"
+  }
+}
