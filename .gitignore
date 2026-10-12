@@ -1,39 +1,29 @@
-# 환경 변수
+# Dependencies
+node_modules/
+
+# Environment variables
 .env
 .env.*
 !.env.example
 
-# 의존성
-node_modules/
-__pycache__/
-*.py[cod]
-venv/
-.venv/
-
-# 빌드 산출물
+# Build output
 dist/
-build/
-out/
-target/
+coverage/
 
-# 로그
+# Logs
 *.log
-logs/
+npm-debug.log*
 
-# 데이터베이스
-*.sqlite
-*.sqlite3
-*.db
-
-# 수집 원본 데이터 (용량 및 개인정보)
-data/raw/
-
-# IDE
-.idea/
-.vscode/
-*.iml
-*.swp
-
-# OS
+# macOS
 .DS_Store
+
+# Windows
 Thumbs.db
+Desktop.ini
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+
+# Redis
+dump.rdb
