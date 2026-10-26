@@ -13,6 +13,33 @@ app.get('/', (req, res) => {
   });
 });
 
+app.get('/buildings', (req, res) => {
+  res.status(200).json({
+    result: 'Success',
+    status: 200,
+    success: {
+      buildings: [
+        {
+          building_id: 1,
+          building_name: '김수환관',
+          service_status: 'MEASURING'
+        },
+        {
+          building_id: 2,
+          building_name: '마리아관',
+          service_status: 'MEASURING'
+        },
+        {
+          building_id: 3,
+          building_name: '다솔관',
+          service_status: 'MEASURING'
+        }
+      ]
+    },
+    error: null
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`NULLNULL server running on port ${PORT}`);
 });
