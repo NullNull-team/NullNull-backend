@@ -117,7 +117,7 @@ model ElevatorGroup {
 // ============================================================
 
 model Measurement {
-  id              BigInt   @id
+  id              BigInt   @id @default(autoincrement())
   elevatorGroupId Int      @map("elevator_group_id")
   deviceId        Int      @map("device_id")
   measuredAt      DateTime @map("measured_at") @db.DateTime(3)
