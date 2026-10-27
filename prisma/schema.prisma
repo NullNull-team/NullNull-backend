@@ -30,8 +30,61 @@ model Building {
 
   elevatorGroups ElevatorGroup[]
   stairs         Stair[]
+  rooms          Room[]
+  buildingExits  BuildingExit[]
 
   @@map("buildings")
+}
+
+// ============================================================
+// ROOMS
+// ============================================================
+
+model Room {
+  id         Int    @id
+  buildingId Int    @map("building_id")
+  name       String @db.VarChar(20)
+  floor      Int    @db.TinyInt
+
+  building Building @relation(fields: [buildingId], references: [id])
+
+  @@map("rooms")
+}
+
+// ============================================================
+// BUILDING EXITS
+// ============================================================
+
+model BuildingExit {
+  id         Int      @id
+  buildingId Int      @map("building_id")
+  floor      Int      @db.TinyInt
+  name       String   @db.VarChar(30)
+  lat        Decimal? @db.Decimal(9, 6)
+  lng        Decimal? @db.Decimal(9, 6)
+
+  building      Building       @relation(fields: [buildingId], references: [id])
+  walkTimesFrom ExitWalkTime[] @relation("ExitWalkTimeFrom")
+  walkTimesTo   ExitWalkTime[] @relation("ExitWalkTimeTo")
+
+  @@map("building_exits")
+}
+
+// ============================================================
+// EXIT WALK TIMES
+// ============================================================
+
+model ExitWalkTime {
+  fromExitId Int     @map("from_exit_id")
+  toExitId   Int     @map("to_exit_id")
+  seconds    Int     @db.SmallInt
+  isMeasured Boolean @default(false) @map("is_measured")
+
+  fromExit BuildingExit @relation("ExitWalkTimeFrom", fields: [fromExitId], references: [id])
+  toExit   BuildingExit @relation("ExitWalkTimeTo", fields: [toExitId], references: [id])
+
+  @@id([fromExitId, toExitId])
+  @@map("exit_walk_times")
 }
 
 // ============================================================
@@ -39,14 +92,15 @@ model Building {
 // ============================================================
 
 model ElevatorGroup {
-  id            Int    @id
-  buildingId    Int    @map("building_id")
-  name          String @db.VarChar(20)
-  elevatorCount Int    @map("elevator_count") @db.TinyInt
-  roundTripSec  Int    @map("round_trip_sec") @db.SmallInt
-  rssiMin       Int    @map("rssi_min") @db.SmallInt
-  pairedStairId Int    @map("paired_stair_id")
-  sortOrder     Int    @default(0) @map("sort_order") @db.TinyInt
+  id                Int    @id
+  buildingId        Int    @map("building_id")
+  name              String @db.VarChar(20)
+  elevatorCount     Int    @map("elevator_count") @db.TinyInt
+  roundTripSec      Int    @map("round_trip_sec") @db.SmallInt
+  roundTripQuietSec Int?   @map("round_trip_quiet_sec") @db.SmallInt
+  rssiMin           Int    @map("rssi_min") @db.SmallInt
+  pairedStairId     Int    @map("paired_stair_id")
+  sortOrder         Int    @default(0) @map("sort_order") @db.TinyInt
 
   building    Building @relation(fields: [buildingId], references: [id])
   pairedStair Stair    @relation(fields: [pairedStairId], references: [id])
@@ -63,7 +117,7 @@ model ElevatorGroup {
 // ============================================================
 
 model Measurement {
-  id              BigInt   @id
+  id              BigInt   @id @default(autoincrement())
   elevatorGroupId Int      @map("elevator_group_id")
   deviceId        Int      @map("device_id")
   measuredAt      DateTime @map("measured_at") @db.DateTime(3)
@@ -90,6 +144,7 @@ model SensorDevice {
   name            String   @db.VarChar(30)
   apiKeyHash      String?  @map("api_key_hash") @db.Char(64)
   isEnabled       Boolean  @default(true) @map("is_enabled")
+  isSimulated     Boolean  @default(false) @map("is_simulated")
   installedAt     DateTime @default(now()) @map("installed_at") @db.DateTime(0)
 
   elevatorGroup ElevatorGroup @relation(fields: [elevatorGroupId], references: [id])
@@ -172,6 +227,8 @@ model AppSetting {
   correctionFactor       Decimal  @default(2.40) @map("correction_factor") @db.Decimal(4, 2)
   recommendHoldSec       Int      @default(30) @map("recommend_hold_sec") @db.SmallInt
   recommendDiffSec       Int      @default(10) @map("recommend_diff_sec") @db.SmallInt
+  walkSpeedMps           Decimal  @default(1.20) @map("walk_speed_mps") @db.Decimal(3, 2)
+  walkDetourFactor       Decimal  @default(1.30) @map("walk_detour_factor") @db.Decimal(3, 2)
   updatedAt              DateTime @default(now()) @map("updated_at") @db.DateTime(0)
 
   @@map("app_settings")
