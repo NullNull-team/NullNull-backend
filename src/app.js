@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
+import { success } from './utils/response.js';
+import { errorHandler, NotFoundError } from './errors/error.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -7,10 +9,12 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    message: 'NULLNULL backend server is running',
-  });
+  return res.status(200).json(
+    success(200, {
+      status: 'OK',
+      message: 'NULLNULL backend server is running',
+    })
+  );
 });
 
 app.get('/buildings', (req, res) => {
@@ -39,6 +43,13 @@ app.get('/buildings', (req, res) => {
     error: null
   });
 });
+
+// 등록되지 않은 경로
+app.use((req, res, next) => {
+  next(new NotFoundError('존재하지 않는 경로입니다.'));
+});
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`NULLNULL server running on port ${PORT}`);
