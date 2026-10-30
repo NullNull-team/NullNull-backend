@@ -44,6 +44,7 @@ app.get('/buildings', (req, res) => {
   });
 });
 
+// 모든 API 라우터는 반드시 이 404 에러 처리 미들웨어 위에 등록해야 합니다.
 // 등록되지 않은 경로
 app.use((req, res, next) => {
   next(new NotFoundError('존재하지 않는 경로입니다.'));
