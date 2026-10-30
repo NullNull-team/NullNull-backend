@@ -142,7 +142,7 @@ model SensorDevice {
   id              Int      @id
   elevatorGroupId Int      @map("elevator_group_id")
   name            String   @db.VarChar(30)
-  apiKeyHash      String?  @map("api_key_hash") @db.Char(64)
+  apiKeyHash      String?  @unique @map("api_key_hash") @db.Char(64)
   isEnabled       Boolean  @default(true) @map("is_enabled")
   isSimulated     Boolean  @default(false) @map("is_simulated")
   installedAt     DateTime @default(now()) @map("installed_at") @db.DateTime(0)
