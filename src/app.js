@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { success } from './utils/response.js';
 import { errorHandler, NotFoundError } from './errors/error.js';
+import sensorRoutes from './routes/sensor_routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,6 +44,9 @@ app.get('/buildings', (req, res) => {
     error: null
   });
 });
+
+// 센서 API 라우터
+app.use('/sensors', sensorRoutes);
 
 // 모든 API 라우터는 반드시 이 404 에러 처리 미들웨어 위에 등록해야 합니다.
 // 등록되지 않은 경로
