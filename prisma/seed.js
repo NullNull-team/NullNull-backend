@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 
 
 // Congestion
-
+import { seedCongestionLevels } from './seeds/congestion_level_seed.js';
 
 // Sensor
 
@@ -20,7 +20,7 @@ const prisma = new PrismaClient();
 // - Sensor: exit_walk_times(building_exits 참조), sensor_devices(elevator_groups 참조) → measurements(congestion_levels 참조)
 const SEED_PARTS = [
   { part: 'Building', seeds: [] },
-  { part: 'Congestion', seeds: [] },
+  { part: 'Congestion', seeds: [seedCongestionLevels] },
   { part: 'Sensor', seeds: [] },
 ];
 
